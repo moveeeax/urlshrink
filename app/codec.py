@@ -26,3 +26,8 @@ def decode(s: str) -> int:
             raise ValueError(f"Invalid base62 character: {char!r}")
         result = result * BASE + ALPHABET.index(char)
     return result
+
+
+def pad(s: str, length: int = CODE_LENGTH) -> str:
+    """Left-pad a base62 string with '0' to a fixed length."""
+    return s.rjust(length, ALPHABET[0])
