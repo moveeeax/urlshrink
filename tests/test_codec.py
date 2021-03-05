@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.codec import ALPHABET, BASE, CODE_LENGTH, decode, encode
+from app.codec import ALPHABET, BASE, CODE_LENGTH, decode, encode, pad
 
 
 class TestEncode:
@@ -49,3 +49,17 @@ class TestRoundTrip:
     def test_round_trip_large(self):
         for n in [999_999, 1_234_567, 62 ** 5, 62 ** 6 - 1]:
             assert decode(encode(n)) == n
+
+
+class TestPad:
+    def test_pads_short_string(self):
+        result = pad("1", 6)
+        assert result == "000001"
+        assert len(result) == 6
+
+    def test_no_change_when_already_correct_length(self):
+        s = "ABCDEF"
+        assert pad(s, 6) == s
+
+    def test_default_length_is_six(self):
+        assert len(pad(encode(0))) == CODE_LENGTH
