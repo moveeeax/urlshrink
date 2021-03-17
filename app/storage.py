@@ -1,8 +1,11 @@
-"""Storage abstraction for the URL shortener."""
+"""Storage abstraction and in-memory implementation for the URL shortener."""
 
+import random
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
+
+from app.codec import CODE_LENGTH, encode, pad
 
 
 class URLRecord:
@@ -42,3 +45,40 @@ class BaseStorage(ABC):
     @abstractmethod
     def delete(self, code: str) -> bool:
         """Delete the record for *code*. Return True if it existed."""
+
+    def _generate_code(self) -> str:
+        """Generate a random 6-char base62 code that is not yet in storage."""
+        for _ in range(10):
+            n = random.randint(0, 62 ** CODE_LENGTH - 1)
+            code = pad(encode(n))
+            if self.get(code) is None:
+                return code
+        raise RuntimeError("Could not generate a unique short code after 10 attempts")
+
+
+class InMemoryStorage(BaseStorage):
+    """Volatile in-memory storage — used by tests."""
+
+    def __init__(self):
+        self._store = {}  # code -> URLRecord
+
+    def save(self, url: str, code: Optional[str] = None) -> URLRecord:
+        if code is None:
+            code = self._generate_code()
+        record = URLRecord(code=code, url=url)
+        self._store[code] = record
+        return record
+
+    def get(self, code: str) -> Optional[URLRecord]:
+        return self._store.get(code)
+
+    def increment_hits(self, code: str) -> None:
+        record = self._store.get(code)
+        if record is not None:
+            record.hits += 1
+
+    def delete(self, code: str) -> bool:
+        if code in self._store:
+            del self._store[code]
+            return True
+        return False
