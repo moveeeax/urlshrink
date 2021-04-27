@@ -82,3 +82,66 @@ class InMemoryStorage(BaseStorage):
             del self._store[code]
             return True
         return False
+
+
+class SQLAlchemyStorage(BaseStorage):
+    """SQLAlchemy-backed persistent storage."""
+
+    def __init__(self, session_factory):
+        # session_factory is a callable that returns a Session (e.g. SessionLocal)
+        self._session_factory = session_factory
+
+    def _to_record(self, entry) -> URLRecord:
+        return URLRecord(
+            code=entry.code,
+            url=entry.url,
+            hits=entry.hits,
+            created_at=entry.created_at,
+        )
+
+    def save(self, url: str, code: Optional[str] = None) -> URLRecord:
+        from app.models import URLEntry  # local import to avoid circular deps
+        if code is None:
+            code = self._generate_code()
+        db = self._session_factory()
+        try:
+            entry = URLEntry(code=code, url=url)
+            db.add(entry)
+            db.commit()
+            db.refresh(entry)
+            return self._to_record(entry)
+        finally:
+            db.close()
+
+    def get(self, code: str) -> Optional[URLRecord]:
+        from app.models import URLEntry
+        db = self._session_factory()
+        try:
+            entry = db.query(URLEntry).filter(URLEntry.code == code).first()
+            return self._to_record(entry) if entry else None
+        finally:
+            db.close()
+
+    def increment_hits(self, code: str) -> None:
+        from app.models import URLEntry
+        db = self._session_factory()
+        try:
+            db.query(URLEntry).filter(URLEntry.code == code).update(
+                {URLEntry.hits: URLEntry.hits + 1}
+            )
+            db.commit()
+        finally:
+            db.close()
+
+    def delete(self, code: str) -> bool:
+        from app.models import URLEntry
+        db = self._session_factory()
+        try:
+            entry = db.query(URLEntry).filter(URLEntry.code == code).first()
+            if entry is None:
+                return False
+            db.delete(entry)
+            db.commit()
+            return True
+        finally:
+            db.close()
