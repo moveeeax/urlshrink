@@ -1,4 +1,4 @@
-"""Storage abstraction and in-memory implementation for the URL shortener."""
+"""Storage abstraction layer: BaseStorage interface + InMemoryStorage + SQLAlchemyStorage."""
 
 import random
 from abc import ABC, abstractmethod
