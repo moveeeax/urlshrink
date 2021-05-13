@@ -2,7 +2,8 @@
 
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from pydantic import BaseModel
 from starlette.requests import Request
 
 from app.storage import BaseStorage, InMemoryStorage, SQLAlchemyStorage
@@ -32,3 +33,23 @@ def get_storage(request: Request) -> BaseStorage:
     if override is not None:
         return override
     return _default_storage()
+
+
+# ---------------------------------------------------------------------------
+# Request / response schemas
+# ---------------------------------------------------------------------------
+
+class ShortenRequest(BaseModel):
+    url: str
+
+
+class ShortenResponse(BaseModel):
+    code: str
+    short_url: str
+
+
+class StatsResponse(BaseModel):
+    code: str
+    url: str
+    hits: int
+    created_at: str
