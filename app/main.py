@@ -2,7 +2,8 @@
 
 from typing import Optional
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from starlette.requests import Request
 
@@ -70,3 +71,15 @@ def shorten_url(
         code=record.code,
         short_url=f"{BASE_URL}/{record.code}",
     )
+
+
+@app.get("/{code}")
+def redirect_url(
+    code: str,
+    storage: BaseStorage = Depends(get_storage),
+):
+    record = storage.get(code)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+    storage.increment_hits(code)
+    return RedirectResponse(url=record.url, status_code=307)
