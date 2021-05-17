@@ -73,6 +73,17 @@ def shorten_url(
     )
 
 
+@app.get("/api/stats/{code}", response_model=StatsResponse)
+def get_stats(
+    code: str,
+    storage: BaseStorage = Depends(get_storage),
+):
+    record = storage.get(code)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+    return StatsResponse(**record.to_dict())
+
+
 @app.get("/{code}")
 def redirect_url(
     code: str,
