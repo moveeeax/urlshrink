@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI
 from pydantic import BaseModel
 from starlette.requests import Request
 
+from app.config import BASE_URL
 from app.storage import BaseStorage, InMemoryStorage, SQLAlchemyStorage
 
 app = FastAPI(title="urlshrink", version="0.1.0")
@@ -53,3 +54,19 @@ class StatsResponse(BaseModel):
     url: str
     hits: int
     created_at: str
+
+
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
+
+@app.post("/api/shorten", response_model=ShortenResponse, status_code=201)
+def shorten_url(
+    body: ShortenRequest,
+    storage: BaseStorage = Depends(get_storage),
+):
+    record = storage.save(body.url)
+    return ShortenResponse(
+        code=record.code,
+        short_url=f"{BASE_URL}/{record.code}",
+    )
