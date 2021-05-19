@@ -84,6 +84,17 @@ def get_stats(
     return StatsResponse(**record.to_dict())
 
 
+@app.delete("/api/{code}", status_code=204)
+def delete_url(
+    code: str,
+    storage: BaseStorage = Depends(get_storage),
+):
+    deleted = storage.delete(code)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Code not found")
+    return None
+
+
 @app.get("/{code}")
 def redirect_url(
     code: str,
