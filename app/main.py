@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from starlette.requests import Request
 
 from app.config import BASE_URL
@@ -43,6 +43,20 @@ def get_storage(request: Request) -> BaseStorage:
 
 class ShortenRequest(BaseModel):
     url: str
+
+    @validator("url")
+    def url_must_be_http(cls, v: str) -> str:
+        v = v.strip()
+        if not (v.startswith("http://") or v.startswith("https://")):
+            raise ValueError("URL must start with http:// or https://")
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(v)
+            if not parsed.netloc:
+                raise ValueError("URL has no host")
+        except Exception as exc:
+            raise ValueError(str(exc))
+        return v
 
 
 class ShortenResponse(BaseModel):
