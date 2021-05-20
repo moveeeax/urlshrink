@@ -47,13 +47,20 @@ class BaseStorage(ABC):
         """Delete the record for *code*. Return True if it existed."""
 
     def _generate_code(self) -> str:
-        """Generate a random 6-char base62 code that is not yet in storage."""
-        for _ in range(10):
+        """Generate a random 6-char base62 code that is not yet in storage.
+
+        Retries up to 10 times on collision (extremely unlikely with 62^6 > 56B space).
+        """
+        max_attempts = 10
+        for attempt in range(max_attempts):
             n = random.randint(0, 62 ** CODE_LENGTH - 1)
             code = pad(encode(n))
             if self.get(code) is None:
                 return code
-        raise RuntimeError("Could not generate a unique short code after 10 attempts")
+        raise RuntimeError(
+            f"Could not generate a unique short code after {max_attempts} attempts; "
+            "storage may be saturated"
+        )
 
 
 class InMemoryStorage(BaseStorage):
