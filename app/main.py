@@ -94,7 +94,7 @@ def get_stats(
 ):
     record = storage.get(code)
     if record is None:
-        raise HTTPException(status_code=404, detail="Code not found")
+        raise HTTPException(status_code=404, detail="Short code not found")
     return StatsResponse(**record.to_dict())
 
 
@@ -105,7 +105,7 @@ def delete_url(
 ):
     deleted = storage.delete(code)
     if not deleted:
-        raise HTTPException(status_code=404, detail="Code not found")
+        raise HTTPException(status_code=404, detail="Short code not found")
     return None
 
 
@@ -116,6 +116,6 @@ def redirect_url(
 ):
     record = storage.get(code)
     if record is None:
-        raise HTTPException(status_code=404, detail="Code not found")
+        raise HTTPException(status_code=404, detail="Short code not found")
     storage.increment_hits(code)
     return RedirectResponse(url=record.url, status_code=307)
