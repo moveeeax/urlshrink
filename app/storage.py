@@ -18,7 +18,7 @@ class URLRecord:
         self.hits = hits
         self.created_at = created_at or datetime.utcnow()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "code": self.code,
             "url": self.url,
