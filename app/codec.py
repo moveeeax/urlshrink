@@ -4,6 +4,8 @@ ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 BASE = len(ALPHABET)
 CODE_LENGTH = 6
 
+__all__ = ["ALPHABET", "BASE", "CODE_LENGTH", "encode", "decode", "pad"]
+
 
 def encode(n: int) -> str:
     """Encode a non-negative integer to a base62 string."""
