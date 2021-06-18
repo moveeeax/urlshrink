@@ -106,7 +106,6 @@ def delete_url(
     deleted = storage.delete(code)
     if not deleted:
         raise HTTPException(status_code=404, detail="Short code not found")
-    return None
 
 
 @app.get("/{code}")
