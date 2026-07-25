@@ -66,7 +66,7 @@ class TestRedirect:
     def test_redirect_to_original_url(self, client):
         shorten_resp = client.post("/api/shorten", json={"url": "https://example.com/page"})
         code = shorten_resp.json()["code"]
-        resp = client.get(f"/{code}", allow_redirects=False)
+        resp = client.get(f"/{code}", follow_redirects=False)
         assert resp.status_code == 307
         assert resp.headers["location"] == "https://example.com/page"
 
@@ -74,13 +74,13 @@ class TestRedirect:
         shorten_resp = client.post("/api/shorten", json={"url": "https://example.com"})
         code = shorten_resp.json()["code"]
         # Two hits
-        client.get(f"/{code}", allow_redirects=False)
-        client.get(f"/{code}", allow_redirects=False)
+        client.get(f"/{code}", follow_redirects=False)
+        client.get(f"/{code}", follow_redirects=False)
         record = inject_memory_storage.get(code)
         assert record.hits == 2
 
     def test_unknown_code_returns_404(self, client):
-        resp = client.get("/zzzzzz", allow_redirects=False)
+        resp = client.get("/zzzzzz", follow_redirects=False)
         assert resp.status_code == 404
 
 
@@ -103,8 +103,8 @@ class TestStats:
     def test_stats_reflect_hits(self, client):
         shorten_resp = client.post("/api/shorten", json={"url": "https://example.com"})
         code = shorten_resp.json()["code"]
-        client.get(f"/{code}", allow_redirects=False)
-        client.get(f"/{code}", allow_redirects=False)
+        client.get(f"/{code}", follow_redirects=False)
+        client.get(f"/{code}", follow_redirects=False)
         stats = client.get(f"/api/stats/{code}").json()
         assert stats["hits"] == 2
 
@@ -128,7 +128,7 @@ class TestDelete:
         shorten_resp = client.post("/api/shorten", json={"url": "https://example.com"})
         code = shorten_resp.json()["code"]
         client.delete(f"/api/{code}")
-        resp = client.get(f"/{code}", allow_redirects=False)
+        resp = client.get(f"/{code}", follow_redirects=False)
         assert resp.status_code == 404
 
     def test_delete_unknown_code_returns_404(self, client):

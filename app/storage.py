@@ -1,6 +1,6 @@
 """Storage abstraction layer: BaseStorage interface + InMemoryStorage + SQLAlchemyStorage."""
 
-import random
+import secrets
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
@@ -49,11 +49,17 @@ class BaseStorage(ABC):
     def _generate_code(self) -> str:
         """Generate a random 6-char base62 code that is not yet in storage.
 
+        The code is drawn from :mod:`secrets` (a cryptographically secure RNG),
+        *not* :mod:`random`. ``random`` is a Mersenne Twister: after observing a
+        few hundred outputs an attacker can recover its internal state and then
+        predict — or reconstruct — every other code the process has issued. Short
+        codes are the only thing protecting a link, so they must be unguessable.
+
         Retries up to 10 times on collision (extremely unlikely with 62^6 > 56B space).
         """
         max_attempts = 10
-        for attempt in range(max_attempts):
-            n = random.randint(0, 62 ** CODE_LENGTH - 1)
+        for _ in range(max_attempts):
+            n = secrets.randbelow(62 ** CODE_LENGTH)
             code = pad(encode(n))
             if self.get(code) is None:
                 return code
