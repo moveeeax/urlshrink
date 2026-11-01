@@ -2,9 +2,9 @@
 fastapi==0.162.0
 starlette==1.10.0
 pydantic==2.14.1
-uvicorn==0.51.0
-SQLAlchemy==2.0.51
+uvicorn==0.54.0
+SQLAlchemy==2.1.6
 
 # Test-only
-pytest==9.1.1
+pytest==9.2.0
 httpx==0.28.1
