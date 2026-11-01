@@ -1,17 +1,29 @@
+# Monthly, with patch and minor updates grouped into one PR each; majors
+# come one per PR. Patch PRs merge themselves once CI passes
+# (dependabot-auto-merge.yml).
 version: 2
 
 updates:
   - package-ecosystem: pip
-    directory: "/"
+    directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      patch:
+        update-types: [patch]
+      minor:
+        update-types: [minor]
 
   - package-ecosystem: github-actions
-    directory: "/"
+    directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     commit-message:
       prefix: "chore(ci)"
+    groups:
+      patch:
+        update-types: [patch]
+      minor:
+        update-types: [minor]
