@@ -189,3 +189,7 @@ urlshrink/
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+**Archived on 2026-11-05.** custom slugs, visit tracking with geolocation, API auth, multiple domains, expiring links, plugins. urlshrink has no feature they lack. Its real asset is the documented security model and test suite. If it stays, the first three features below close the gaps its own README admits to.
