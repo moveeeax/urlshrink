@@ -2,7 +2,7 @@
 
 import secrets
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from app.codec import CODE_LENGTH, encode, pad
@@ -16,7 +16,12 @@ class URLRecord:
         self.code = code
         self.url = url
         self.hits = hits
-        self.created_at = created_at or datetime.utcnow()
+        if created_at is None:
+            created_at = datetime.now(timezone.utc)
+        elif created_at.tzinfo is None:
+            # SQLite hands timestamps back without tzinfo; they are stored as UTC.
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        self.created_at = created_at
 
     def to_dict(self) -> dict:
         return {
